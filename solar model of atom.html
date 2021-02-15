@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+    <title></title>
+</head>
+<body>
+    <style type="text/css">
+        body{
+            font-family: 'Roboto', sans-serif;
+            background:#383e56;
+        }
+        .canvas,#canvas1,#canvas2,#canvas{
+            position: fixed;
+            right: 0px;
+            z-index: 0;
+        }
+        #side,#side_content,#side_text{
+            position: fixed;
+            height: 95%;
+            width: 15em;
+            padding: 10px;
+        }
+        #side{
+            left: 0px;
+            top: 0px;
+            padding: 15px;
+            font-size: 20px;
+            z-index: 2;
+            opacity: 0.1;
+        }
+        #side:hover{
+            opacity: 0.8;
+        }
+        #side_content{
+            z-index: 1;
+            filter: blur(5px);
+            background-color: #9fb8ad;
+            opacity: 0.8;
+        }
+        #side_text{
+            z-index: 3;
+        }
+        a{
+            text-decoration: none;
+            color: #557174;
+            cursor: pointer;
+        }
+        #controls{
+            padding: 10px;
+        }
+        button{
+            border:0;
+            margin: 5px;
+            background-color: #d3e0ea;
+            width: 25px;
+        }
+        button:hover{
+            background-color: #f6f5f5;
+            cursor: pointer;
+        }
+        #ztn{
+            opacity: 1;
+        }
+        #ztn:hover +#zton{
+            opacity: 1;
+            visibility: visible;
+        }
+        #zton{
+            width:15em;
+            height: 10em;
+            position: fixed;
+            background-color: #9fb8ad;
+            z-index: 5;
+            border-radius: 5px;
+            transition: .5s ease;
+            opacity: 0;
+            visibility: hidden;
+        }
+    </style>
+    <div id="side">
+        <div id="side_text">    
+            <h1><center>Atom</center></h1>
+        Это, планетарная модель атома, создана физиком <a href="https://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B7%D0%B5%D1%80%D1%84%D0%BE%D1%80%D0%B4,_%D0%AD%D1%80%D0%BD%D0%B5%D1%81%D1%82">Резерфордом</a> в 1911 году. Шарики в центре, это ядро, оно состоит из положительно заряженных <a onmouseover="protons()" onmouseout="setTimeout(ctx2.clearRect(0,0,innerWidth,innerHeight),1000)">протонов</a>, и нейтрально заряженных <a onmouseover="neutrons()" onmouseout="setTimeout(ctx2.clearRect(0,0,innerWidth,innerHeight),1000)">нейтронов</a>. Вокруг ядра крутятся отрицательно заряженные <a onmouseover="animation=true;requestAnimationFrame(electrons)" onmouseout="animation = false;setTimeout(stopAnimation,10)">электроны</a>. <a id="ztn">Стабильность ядра определяется соотношением протонов и нейтронов</a>,<div id="zton">Z - Количество протонов; <br>N - Количество нейтронов<img width="100%" src="https://lh3.googleusercontent.com/proxy/HymEiVhXxT1Aup6ygoABrGs1yY6-c1OAj0RyH9MD78g8B8Eu3N2vyP-V9D3NdvX0tqeQSlaNHcnivNIVEYSHC4GMZFNHP10KGO9MCqs"></div> чем оно меньше, тем стабильнее ядро. Нестабильный ядра склонны к распаду с выбросом определенных частиц - альфа, бетта и гамма.
+        <div id="controls">
+           Кол-во электронов <button onclick="decrease()">-</button><button onclick="increase()">+</button>
+           <br>
+           Размер электрона<input onchange="ctx.clearRect(0,0,innerWidth,innerHeight)" id="size" min="1" max="30" type="range"></input>    
+        <div id="stb"></div>
+        <div id="prot"></div>
+        <div id="neut"></div>
+        
+        </div>
+        </div>
+        <div id="side_content"></div>
+    </div>
+    <div class="canvas">
+    <canvas id="canvas"></canvas>
+    <canvas id="canvas1"></canvas>
+    <canvas id="canvas2"></canvas>
+    </div>
+<script type="text/javascript">
+    var canvas = document.getElementById('canvas')
+    var canvas1 = document.getElementById('canvas1')
+    var canvas2 = document.getElementById('canvas2')
+    var ctx = canvas.getContext("2d")
+    var ctx1 = canvas1.getContext("2d")
+    var ctx2 = canvas2.getContext("2d")
+    canvas.width = window.innerWidth-20
+    canvas1.width = canvas.width
+    canvas2.width = canvas.width
+    canvas.height = window.innerHeight-20
+    canvas1.height = canvas.height
+    canvas2.height = canvas.height
+    var ball = [];
+    var countBall = 50;
+    var iB=[]
+    var innerBall = 30+Math.random()*10;
+    innerBall = Math.round(innerBall)
+    var x = canvas.width/2;
+    var y = canvas.height/2;
+    var animation = false
+    var k = 0.1
+    var p = 0
+    var n = 0
+    var stb = 0
+    var stbk = 0
+    for(var i = 0; i<countBall;i++){
+    ball.push({
+        x: Math.random()*(100+innerWidth-200),
+        y: Math.random()*(100+innerHeight-200),
+        velocity: 1000+Math.random()*9000,
+        vx: (Math.random()-0.5)*5,
+        vy: (Math.random()-0.5)*5,
+        xd: ball.x - x,
+        yd: ball.y - y,
+        h: Math.random()*360,
+        r: 10
+    })
+}
+    for(var i = 0; i<innerBall;i++){
+    iB.push({
+        x: -25+Math.random()*50,
+        y: -25+Math.random()*50,
+        c: Math.round(Math.random()),
+        r:15,
+        vx:0,
+        vy:0,
+    })
+}
+ countBall=5
+iB[innerBall-1].c=1
+iB[innerBall-2].c=0
+    for(var i = 0; i<innerBall;i++){
+if(iB[i].c==1){p++}else{n++}
+}
+    function draw() {
+stb = n/p
+stb*=10
+stb=Math.round(stb)
+stb/=10
+        document.getElementById('stb').innerHTML="Соотношение:"+stb
+        document.getElementById('prot').innerHTML="Кол-во протонов:"+p
+        document.getElementById('neut').innerHTML="Кол-во нейтронов:"+n
+        ctx1.clearRect(0,0,innerWidth,innerHeight)
+        ctx.beginPath()
+        for(var i =0; i<countBall;i++){
+        var b = ball[i];
+        b.r = document.getElementById('size').value
+        b.h+=0.2
+        ctx.moveTo(b.x,b.y)
+        ctx.arc(b.x,b.y,b.r,0,7);
+        ctx.fillStyle="hsl("+b.h+",50%,50%)"
+        }
+        ctx.fill()
+        animate()
+         for(var i =0; i<innerBall;i++){
+        ctx1.beginPath()
+        var ib = iB[i];
+        var b = ball[i];
+        if(ib.c==1){ctx1.fillStyle="hsl(0,50%,50%)"}
+            else{ctx1.fillStyle='hsl(220,50%,50%)'}
+        ctx1.moveTo(ib.x,ib.y)
+        if(stb<0.5||stb>1.5){ib.vx=-3+Math.random()*6;ib.vy=-3+Math.random()*6;ctx.clearRect(0,0,innerWidth,innerHeight);p=0;n=0;}
+        ib.x+=ib.vx
+        ib.y+=ib.vy
+        ib.r+=k/10
+        if(ib.r>=18 || ib.r<=12){k=-k}
+        if(ib.r>20){ib.r=15}
+        ctx1.arc(x+ib.x,y+ib.y,ib.r,0,7);
+        ctx1.closePath()
+        ctx1.fill()
+        }
+    }
+    function animate() {
+        for(var i = 0;i<countBall;i++){
+            var b = ball[i];
+        b.xd=x-b.x
+        b.yd=y-b.y
+        if(p!=0 && n!=0){
+        b.vx = b.vx+b.xd/b.velocity
+        b.vy = b.vy+b.yd/b.velocity
+    }
+        b.x = b.x + b.vx;
+        b.y = b.y + b.vy;
+        }
+    }
+   
+    function protons(){
+        ctx2.beginPath()
+        var ib = iB[innerBall-1];
+        ctx2.moveTo(x+ib.x,y+ib.y)
+        ctx2.lineTo(600,100)
+        ctx2.lineTo(550,100)
+        ctx2.strokeStyle = 'white'
+        ctx2.fillStyle='white'
+        ctx2.stroke()
+        ctx2.font = '20px Verdana'
+        ctx2.fillText('Протон',470,100)
+        ctx2.closePath()
+}
+    function neutrons(){
+        ctx2.beginPath()
+        var ib = iB[innerBall-2];
+        ctx2.moveTo(x+ib.x,y+ib.y)
+        ctx2.lineTo(600,innerHeight/1.2)
+        ctx2.lineTo(550,innerHeight/1.2)
+        ctx2.strokeStyle = 'white'
+        ctx2.fillStyle='white'
+        ctx2.stroke()
+        ctx2.font = '20px Verdana'
+        ctx2.fillText('Нейтрон',470,innerHeight/1.2)
+        ctx2.closePath()
+}
+    function electrons(){
+        ctx2.clearRect(0,0,innerWidth,innerHeight)
+        ctx2.beginPath()
+        var b = ball[countBall-1];
+        ctx2.moveTo(b.x,b.y)
+        ctx2.lineTo(600,innerHeight/1.9)
+        ctx2.lineTo(550,innerHeight/1.9)
+        ctx2.strokeStyle = 'white'
+        ctx2.fillStyle='white'
+        ctx2.stroke()
+        ctx2.font = '20px Verdana'
+        ctx2.fillText('Электрон',470,innerHeight/1.9)
+        ctx2.closePath()
+        if(animation){requestAnimationFrame(electrons)}
+}
+function stopAnimation(){
+    animation = false;
+    ctx2.clearRect(0,0,innerWidth,innerHeight)
+}
+function decrease(){countBall--;ctx.clearRect(0,0,innerWidth,innerHeight);innerBall--;p--}
+function increase(){if(countBall>49){alert('Может хватит?')}else{
+    countBall++;innerBall++;p++
+}
+}
+setInterval(draw,8)
+</script>
+</body>
+</html> 
